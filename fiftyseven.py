@@ -76,7 +76,24 @@ def LowestRateForStay(start_date, end_date):
   else:
     return (lowest_room, lowest_rate)
 
-    
+
+def LowestRatesForSubspansOfLength(start_date, end_date, length):
+    while start_date + timedelta(length) <= end_date:
+        span_end = start_date + timedelta(length)
+        best_span = LowestRateForStay(start_date, span_end)
+        #print "Best span of length %s %s (%s days): %s" % (start_date, span_end, length, best_span)
+        yield (start_date, span_end, best_span)
+        start_date = start_date + timedelta(1)
+
+def LowestRatesForSubspans(start_date, end_date):
+    #print "Lowest rates from: %s-%s" % (start_date, end_date)
+    days_covered = (end_date - start_date).days
+    for length in range(days_covered, 0, -1):
+        #print "Getting spans of length %s" % (length,)
+        for x in LowestRatesForSubspansOfLength(start_date, end_date, length):
+          yield x
+        
+
 
 # Single Night Test
 #for i in range(2,4):
@@ -94,3 +111,9 @@ def LowestRateForStay(start_date, end_date):
 #  startdate = date.today() + timedelta(i)
 #  enddate = startdate + timedelta(1)
 #  print str(startdate) + ": " + str(LowestRateForStay(startdate, enddate))
+
+# Find all lowest rates for subspans
+#startdate = date.today() + timedelta(8)
+#enddate = date.today() + timedelta(11)
+#for z in LowestRatesForSubspans(startdate, enddate):
+#   print z
