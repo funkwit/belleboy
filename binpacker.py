@@ -58,18 +58,26 @@ def FindBinPackings(startdate, enddate, lowest_rates, stays_so_far=None, nights_
 def BinPacks(startdate, enddate, lowest_rates_for_subspans):
   for packing in FindBinPackings(startdate, enddate, lowest_rates_for_subspans):
     room_changes = len(packing) - 1
+    hotel_changes = -1
+    last_hotel = "XXX"
+    for stay in packing:
+        if stay[0] != last_hotel:
+          hotel_changes += 1
+          last_hotel = stay[0]
     price = sum([x[3][1] for x in packing])
     pretty_stays = ["%s-%s in %s ($%s)" % (x[1], x[2], x[3][0], x[3][1]) for x in packing]
-    yield(x[0], price, room_changes, pretty_stays)
+    yield(x[0], price, hotel_changes, room_changes, pretty_stays)
 
 def BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
-    bin_packs = sorted(BinPacks(startdate, enddate, lowest_rates_for_subspans), key=lambda x: (x[1], x[2]))
+    bin_packs = sorted(BinPacks(startdate, enddate, lowest_rates_for_subspans), key=lambda x: (x[1], x[2], x[3]))
     last_price = 999999
-    last_changes = 99999
+    last_room_changes = 99999
+    last_hotel_changes = 99999
     for bin_pack in bin_packs:
-        if bin_pack[0] < last_price or bin_pack[1] < last_changes:
+        if bin_pack[1] < last_price or bin_pack[2] < last_hotel_changes or bin_pack[3] < last_room_changes :
             last_price = bin_pack[1]
-            last_changes = bin_pack[2]
+            last_hotel_changes = bin_pack[2]
+            last_room_changes = bin_pack[3]
             yield bin_pack
     
 hotels = (fiftyseven.FiftySeven(),)
@@ -92,9 +100,10 @@ if (True):
   ("57 Hotel", date(2016, 2, 16), date(2016, 2, 18), (u'Twin Shoebox', 434.15)),
   ("57 Hotel", date(2016, 2, 15), date(2016, 2, 16), (u'57 Single', 135.85)),
   ("57 Hotel", date(2016, 2, 16), date(2016, 2, 17), (u'57 Single', 170.05)),
+  ("Four Points", date(2016, 2, 17), date(2016, 2, 18), (u'Harbour View', 199.00    )),
   ("57 Hotel", date(2016, 2, 17), date(2016, 2, 18), (u'Twin Shoebox', 229.9)),
   )
   print "Finding best solutions for {:%Y-%m-%d}-{:%Y-%m-%d}".format(startdate, enddate)
   for packing in BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
-      print "$%s, %s changes: %s" % (packing[1], packing[2], "; ".join(packing[3]))
+      print "$%s, %s hotel changes, %s room changes: %s" % (packing[1], packing[2], packing[3], "; ".join(packing[4]))
     
