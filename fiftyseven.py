@@ -9,17 +9,24 @@ BASE_ROOM_URL = "https://www.thebookingbutton.com.au/api/v2/reloaded/properties/
 
 def LowestRateForRoomOnNight(room_id, start_date):
   end_date = start_date + timedelta(1)
+  return LowestRateForRoomForStay(room_id, start_date, end_date)
+
+def LowestRateForRoomForStay(room_id, start_date, end_date):
   lowest_rate = 999999
 
   url = BASE_ROOM_URL % (start_date, end_date)
   response = urllib2.urlopen(url)
   html = response.read()
   room_response = json.loads(html)
+  available = True
   for room in room_response:
     if room['id'] in (room_id,):
       #print json.dumps(room, indent=3)
-      available = room["room_type_dates"][0]["available"]
-
+      for roomdate in room["room_type_dates"]:
+        available &= roomdate["available"] > 0
+        # print str(roomdate) + " - " + str(roomdate["available"] > 0)
+  #print available
+  
   if available:
     url = BASE_RATE_URL % (start_date, end_date)
     # print url
@@ -29,10 +36,17 @@ def LowestRateForRoomOnNight(room_id, start_date):
     for room in rate_response:
       if room['room_type_id'] in (room_id,):
         #print json.dumps(room, indent=3)
-        rateinfo = room['room_rate_dates'][0]
-        # print json.dumps(rateinfo, indent=3)
-        if not rateinfo["stop_sell"] and rateinfo['rate'] < lowest_rate:
-            lowest_rate = rateinfo['rate']
+        valid_prices = True
+        total_price = 0
+        for rateinfo in room['room_rate_dates']:
+          # print json.dumps(rateinfo, indent=3)
+          if rateinfo["stop_sell"]:
+              valid_prices = False
+          else:
+              total_price += rateinfo['rate']
+              
+        if valid_prices and (total_price < lowest_rate):
+            lowest_rate = total_price
 
   if lowest_rate == 999999:  
     return None
@@ -41,6 +55,12 @@ def LowestRateForRoomOnNight(room_id, start_date):
 
 
 # Single Night Test
+#for i in range(2,6):
+#  startdate = date.today() + timedelta(i)
+#  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
+  
+# Multi Night Test
 for i in range(2,6):
   startdate = date.today() + timedelta(i)
-  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
+  enddate = date.today() + timedelta(i+3)
+  print str(startdate) + "-" + str(enddate) + ": " + str(LowestRateForRoomForStay(103576, startdate, enddate))
