@@ -2,6 +2,7 @@
 from datetime import timedelta
 import fiftyseven
 import starwood
+import choicehotels
 
 def LowestRatesForSubspansOfLength(hotel, start_date, end_date, length):
     while start_date + timedelta(length) <= end_date:
@@ -73,7 +74,7 @@ def BinPacks(startdate, enddate, lowest_rates_for_subspans):
           last_hotel = stay[0]
     # print packing
     price = sum([x[3][1] for x in packing])
-    pretty_stays = ["%s-%s in %s ($%s)" % (x[1], x[2], x[3][0], x[3][1]) for x in packing]
+    pretty_stays = ["%s - %s [%s] in %s @ %s ($%s)" % (x[1], x[2], (x[2] - x[1]).days, x[3][0], x[0], x[3][1]) for x in packing]
     yield(x[0], price, hotel_changes, room_changes, pretty_stays)
 
 def BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
@@ -90,9 +91,7 @@ def BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
             yield bin_pack
 
 
-# hotels = (fiftyseven.FiftySeven(),)
-hotels = (fiftyseven.FiftySeven(), starwood.Starwood("Four Points", 1305), )
-
+hotels = (choicehotels.Choice("Castlereagh", "AU852"), choicehotels.Choice("Hotel Harry", "AU763"),fiftyseven.FiftySeven(), starwood.Starwood("Westin Sydney", 1183), starwood.Starwood("Four Points", 1305), starwood.Starwood("Sheraton on the Park", 140))
 # Find all lowest rates for subspans
 if (False):  
   startdate = date.today() + timedelta(8)
@@ -116,15 +115,15 @@ if (False):
   )
   print "Finding best solutions for {:%Y-%m-%d}-{:%Y-%m-%d}".format(startdate, enddate)
   for packing in BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
-      print "$%s, %s hotel changes, %s room changes: %s" % (packing[1], packing[2], packing[3], "; ".join(packing[4]))
+      print "$%s, %s hotel changes, %s room changes:\n\t%s" % (packing[1], packing[2], packing[3], "\n\t".join(packing[4]))
     
     
 # Testez le binpacking for live travel dates
 if (True):
-  startdate = date(2016, 2, 14)
-  enddate = date(2016, 2, 18)
+  startdate = date(2016, 2, 8)
+  enddate = date(2016, 2, 12)
   lowest_rates_for_subspans = list(LowestRatesForSubspansForHotels(hotels, startdate, enddate))
   print "Finding best solutions for {:%Y-%m-%d}-{:%Y-%m-%d}".format(startdate, enddate)
   for packing in BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
-      print "$%s, %s hotel changes, %s room changes: %s" % (packing[1], packing[2], packing[3], "; ".join(packing[4]))
+      print "$%s, %s hotel changes, %s room changes:\n\t%s" % (packing[1], packing[2], packing[3], "\n\t".join(packing[4]))
     
