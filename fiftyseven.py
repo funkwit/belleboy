@@ -11,23 +11,31 @@ def LowestRateForRoomOnNight(room_id, start_date):
   end_date = start_date + timedelta(1)
   return LowestRateForRoomForStay(room_id, start_date, end_date)
 
-def LowestRateForRoomForStay(room_id, start_date, end_date):
-  lowest_rate = 999999
+def DoesRoomResponseIndicateAvailable(room):
+  available = True
+  #print json.dumps(room, indent=3)
+  for roomdate in room["room_type_dates"]:
+    available &= roomdate["available"] > 0
+    # print str(roomdate) + " - " + str(roomdate["available"] > 0)
+  return available
 
+def FetchRoomAvailability(start_date, end_date):
   url = BASE_ROOM_URL % (start_date, end_date)
   response = urllib2.urlopen(url)
   html = response.read()
-  room_response = json.loads(html)
-  available = True
-  for room in room_response:
+  return json.loads(html)
+    
+def RoomIsAvailableForStay(room_id, start_date, end_date):
+  for room in FetchRoomAvailability(room_id, start_date, end_date):
     if room['id'] in (room_id,):
-      #print json.dumps(room, indent=3)
-      for roomdate in room["room_type_dates"]:
-        available &= roomdate["available"] > 0
-        # print str(roomdate) + " - " + str(roomdate["available"] > 0)
-  #print available
+      return DoesRoomResponseIndicateAvailable(room)
+  return False    
+    
+def LowestRateForRoomForStay(room_id, start_date, end_date, known_available=False):
+  lowest_rate = 999999
+
   
-  if available:
+  if known_available or RoomIsAvailableForStay(room_id, start_date, end_date):
     url = BASE_RATE_URL % (start_date, end_date)
     # print url
     response = urllib2.urlopen(url)
@@ -53,14 +61,36 @@ def LowestRateForRoomForStay(room_id, start_date, end_date):
   else:
     return lowest_rate
 
+def LowestRateForStay(start_date, end_date):
+  lowest_rate = 999999
+  lowest_room = None
+  for room in FetchRoomAvailability(start_date, end_date):
+      if DoesRoomResponseIndicateAvailable(room):
+        rate = LowestRateForRoomForStay(room["id"], start_date, end_date, known_available=True)
+        if rate is not None and rate < lowest_rate:
+            lowest_rate = rate
+            lowest_room = room["name"]
+        
+  if lowest_rate == 999999:  
+    return None
+  else:
+    return (lowest_room, lowest_rate)
+
+    
 
 # Single Night Test
-for i in range(2,6):
-  startdate = date.today() + timedelta(i)
-  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
+#for i in range(2,4):
+#  startdate = date.today() + timedelta(i)
+#  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
   
 # Multi Night Test
-for i in range(2,6):
-  startdate = date.today() + timedelta(i)
-  enddate = date.today() + timedelta(i+3)
-  print str(startdate) + "-" + str(enddate) + ": " + str(LowestRateForRoomForStay(103576, startdate, enddate))
+#for i in range(2,6):
+#  startdate = date.today() + timedelta(i)
+#  enddate = date.today() + timedelta(i+3)
+#  print str(startdate) + "-" + str(enddate) + ": " + str(LowestRateForRoomForStay(103576, startdate, enddate))
+
+# Single Night Lowest Rate
+#for i in range(2,7):
+#  startdate = date.today() + timedelta(i)
+#  enddate = startdate + timedelta(1)
+#  print str(startdate) + ": " + str(LowestRateForStay(startdate, enddate))
