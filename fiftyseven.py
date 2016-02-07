@@ -150,40 +150,45 @@ def BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
     
 
 # Single Night Test
-#for i in range(2,4):
-#  startdate = date.today() + timedelta(i)
-#  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
+if (False):
+  for i in range(2,4):
+    startdate = date.today() + timedelta(i)
+    print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
   
 # Multi Night Test
-#for i in range(2,6):
-#  startdate = date.today() + timedelta(i)
-#  enddate = date.today() + timedelta(i+3)
-#  print str(startdate) + "-" + str(enddate) + ": " + str(LowestRateForRoomForStay(103576, startdate, enddate))
+if (False):
+  for i in range(2,6):
+    startdate = date.today() + timedelta(i)
+    enddate = date.today() + timedelta(i+3)
+    print str(startdate) + "-" + str(enddate) + ": " + str(LowestRateForRoomForStay(103576, startdate, enddate))
 
 # Single Night Lowest Rate
-#for i in range(2,7):
-#  startdate = date.today() + timedelta(i)
-#  enddate = startdate + timedelta(1)
-#  print str(startdate) + ": " + str(LowestRateForStay(startdate, enddate))
+if (False):
+  for i in range(2,7):
+    startdate = date.today() + timedelta(i)
+    enddate = startdate + timedelta(1)
+    print str(startdate) + ": " + str(LowestRateForStay(startdate, enddate))
 
 # Find all lowest rates for subspans
-#startdate = date.today() + timedelta(8)
-#enddate = date.today() + timedelta(11)
-#for z in LowestRatesForSubspans(startdate, enddate):
-#   print z
+if (False):  
+  startdate = date.today() + timedelta(8)
+  enddate = date.today() + timedelta(11)
+  for z in LowestRatesForSubspans(startdate, enddate):
+     print z
 
-# Testez le binpacking
-startdate = date(2016, 2, 15)
-enddate = date(2016, 2, 18)
-lowest_rates_for_subspans = (
-(date(2016, 2, 15), date(2016, 2, 18), (u'Dancing Queen', 732.45)),
-(date(2016, 2, 15), date(2016, 2, 17), (u'57 Single', 305.9)),
-(date(2016, 2, 16), date(2016, 2, 18), (u'Twin Shoebox', 434.15)),
-(date(2016, 2, 15), date(2016, 2, 16), (u'57 Single', 135.85)),
-(date(2016, 2, 16), date(2016, 2, 17), (u'57 Single', 170.05)),
-(date(2016, 2, 17), date(2016, 2, 18), (u'Twin Shoebox', 229.9)),
-)
-print "Finding best solutions for {:%Y-%m-%d}-{:%Y-%m-%d}".format(startdate, enddate)
-for packing in BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
-    print "$%s, %s changes: %s" % (packing[0], packing[1], "; ".join(packing[2]))
+# Testez le binpacking with fixed data
+if (True):
+  startdate = date(2016, 2, 15)
+  enddate = date(2016, 2, 18)
+  lowest_rates_for_subspans = (
+  (date(2016, 2, 15), date(2016, 2, 18), (u'Dancing Queen', 732.45)),
+  (date(2016, 2, 15), date(2016, 2, 17), (u'57 Single', 305.9)),
+  (date(2016, 2, 16), date(2016, 2, 18), (u'Twin Shoebox', 434.15)),
+  (date(2016, 2, 15), date(2016, 2, 16), (u'57 Single', 135.85)),
+  (date(2016, 2, 16), date(2016, 2, 17), (u'57 Single', 170.05)),
+  (date(2016, 2, 17), date(2016, 2, 18), (u'Twin Shoebox', 229.9)),
+  )
+  print "Finding best solutions for {:%Y-%m-%d}-{:%Y-%m-%d}".format(startdate, enddate)
+  for packing in BestBinPacks(startdate, enddate, lowest_rates_for_subspans):
+      print "$%s, %s changes: %s" % (packing[0], packing[1], "; ".join(packing[2]))
     
