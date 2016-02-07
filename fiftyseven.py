@@ -55,9 +55,9 @@ def LowestRateForRoomForStay(room_id, start_date, end_date):
 
 
 # Single Night Test
-#for i in range(2,6):
-#  startdate = date.today() + timedelta(i)
-#  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
+for i in range(2,6):
+  startdate = date.today() + timedelta(i)
+  print str(startdate) + ": " + str(LowestRateForRoomOnNight(103576, startdate))
   
 # Multi Night Test
 for i in range(2,6):
